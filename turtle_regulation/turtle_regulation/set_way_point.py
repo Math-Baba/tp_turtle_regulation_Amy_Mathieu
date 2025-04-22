@@ -4,13 +4,14 @@ from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from math import atan2, atan, tan, pi, sqrt
+from turtle_interfaces.srv import SetWayPoint
  
 class Publisher(Node):
     def __init__(self):
         super().__init__('move_towards_waypoint')
  
         self.current_pose = None
-        self.waypoint = [7.0, 7.0]
+        self.waypoint = [2.0, 2.0]
  
         self.subscription = self.create_subscription(
             Pose,
@@ -28,6 +29,11 @@ class Publisher(Node):
             'is_moving',
             10)
         
+        self.service = self.create_service(
+            SetWayPoint,
+            'set_way_point_service',
+            self.set_waypoint_callback
+            )
  
         self.timer = self.create_timer(0.1, self.publisher_callback)
  
@@ -57,9 +63,14 @@ class Publisher(Node):
         e_l = sqrt((self.waypoint[1] - y) ** 2 + (self.waypoint[0] - x) ** 2)
         self.get_logger().info(f"Erreur linéaire : {e_l}")
         
-        distance_tolerance =0.3
+        distance_tolerance = 0.3
  
         if e_l < distance_tolerance:
+            stop_msg = Twist()
+            stop_msg.linear.x = 0.0
+            stop_msg.angular.z = 0.0
+            self.position_publisher.publish(stop_msg)
+
             msg = Bool()
             msg.data = False
             self.is_moving_publisher.publish(msg)
@@ -72,10 +83,18 @@ class Publisher(Node):
            
         msg = Twist()
         Kpl = 0.7
-        Kp = 1.0
+        Kp = 1
         msg.angular.z = Kp * e
         msg.linear.x = Kpl * e_l
         self.position_publisher.publish(msg)
+ 
+    def set_waypoint_callback(self, request, response):
+        self.waypoint[0] = request.x
+        self.waypoint[1] = request.y
+        self.get_logger().info(f"Reçu waypoint: ({request.x}, {request.y})")
+        response.res = True
+        return response
+        
  
         
 def main(args=None):
