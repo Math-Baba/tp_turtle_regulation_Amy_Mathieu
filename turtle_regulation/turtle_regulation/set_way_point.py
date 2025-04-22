@@ -11,7 +11,7 @@ class Publisher(Node):
         super().__init__('move_towards_waypoint')
  
         self.current_pose = None
-        self.waypoint = [2.0, 2.0]
+        self.waypoint = [5.0, 5.0]
  
         self.subscription = self.create_subscription(
             Pose,
@@ -61,9 +61,9 @@ class Publisher(Node):
         #self.get_logger().info(f"Erreur angulaire :{e}")
  
         e_l = sqrt((self.waypoint[1] - y) ** 2 + (self.waypoint[0] - x) ** 2)
-        self.get_logger().info(f"Erreur linéaire : {e_l}")
+        #self.get_logger().info(f"Erreur linéaire : {e_l}")
         
-        distance_tolerance = 0.3
+        distance_tolerance = 2.0
  
         if e_l < distance_tolerance:
             stop_msg = Twist()
@@ -82,8 +82,8 @@ class Publisher(Node):
             
            
         msg = Twist()
-        Kpl = 0.7
-        Kp = 1
+        Kpl = 0.3
+        Kp = 0.8
         msg.angular.z = Kp * e
         msg.linear.x = Kpl * e_l
         self.position_publisher.publish(msg)

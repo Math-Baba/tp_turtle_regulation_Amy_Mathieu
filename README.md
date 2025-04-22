@@ -15,6 +15,18 @@ Un TP ROS 2 pour déplacer une tortue dans `turtlesim` vers des waypoints
 1. Lancer le `turtlesim` :
    ```bash
    ros2 run turtlesim turtlesim_node
+   ```
+   
+2. Lancer ensuite cette commande dans un deuxième terminal :
+   ```bash
+   ros2 run turtle_regulation set_way_point
+   ```
+
+3. Dans un troisième terminal, lancer la commande :
+   ```bash
+   ros2 run turtle_regulation client
+   ```
+
 
 
 ## Partie 1 : 6) Kp — Contrôle de la rotation
