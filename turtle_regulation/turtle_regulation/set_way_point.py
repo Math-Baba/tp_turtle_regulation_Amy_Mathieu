@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Bool
 from math import atan2, atan, tan, pi, sqrt
  
 class Publisher(Node):
@@ -17,10 +18,16 @@ class Publisher(Node):
             self.update_pose,
             10)
  
-        self.publisher = self.create_publisher(
+        self.position_publisher = self.create_publisher(
             Twist,
             '/turtle1/cmd_vel',
             10)
+        
+        self.is_moving_publisher = self.create_publisher(
+            Bool,
+            'is_moving',
+            10)
+        
  
         self.timer = self.create_timer(0.1, self.publisher_callback)
  
@@ -51,16 +58,24 @@ class Publisher(Node):
         self.get_logger().info(f"Erreur linéaire : {e_l}")
         
         distance_tolerance =0.3
-        
-        if e_l < distance_tolerance:
-            return
  
+        if e_l < distance_tolerance:
+            msg = Bool()
+            msg.data = False
+            self.is_moving_publisher.publish(msg)
+            return
+        else :
+            msg = Bool()
+            msg.data = True
+            self.is_moving_publisher.publish(msg)
+            
+           
         msg = Twist()
         Kpl = 0.7
         Kp = 1.0
         msg.angular.z = Kp * e
         msg.linear.x = Kpl * e_l
-        self.publisher.publish(msg)
+        self.position_publisher.publish(msg)
  
         
 def main(args=None):
