@@ -66,6 +66,7 @@ class Publisher(Node):
         distance_tolerance = 2.0
  
         if e_l < distance_tolerance:
+            self.get_logger().info("Waypoint atteint, arrêt de la tortue.")
             stop_msg = Twist()
             stop_msg.linear.x = 0.0
             stop_msg.angular.z = 0.0
@@ -76,6 +77,7 @@ class Publisher(Node):
             self.is_moving_publisher.publish(msg)
             return
         else :
+            self.get_logger().info(f"Déplacement vers le waypoint : ({self.waypoint[0]}, {self.waypoint[1]})")
             msg = Bool()
             msg.data = True
             self.is_moving_publisher.publish(msg)
@@ -92,6 +94,14 @@ class Publisher(Node):
         self.waypoint[0] = request.x
         self.waypoint[1] = request.y
         self.get_logger().info(f"Reçu waypoint: ({request.x}, {request.y})")
+
+        if self.current_pose is not None:
+            e_l = sqrt((self.waypoint[1] - self.current_pose.y) ** 2 + (self.waypoint[0] - self.current_pose.x) ** 2)
+            if e_l >= 2.0:  
+                msg = Bool()
+                msg.data = True
+                self.is_moving_publisher.publish(msg)
+        
         response.res = True
         return response
         
